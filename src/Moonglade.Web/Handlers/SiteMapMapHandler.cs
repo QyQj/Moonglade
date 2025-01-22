@@ -41,10 +41,10 @@ public class SiteMapMapHandler
         MoongladeRepository<PageEntity> pageRepo,
         CancellationToken ct)
     {
-        var sb = new StringBuilder();
-
-        var writerSettings = new XmlWriterSettings { Encoding = Encoding.UTF8, Async = true };
-        await using (var writer = XmlWriter.Create(sb, writerSettings))
+        await using var mem = new MemoryStream();
+        await using var sw = new StreamWriter(mem, Encoding.UTF8);
+        var writerSettings = new XmlWriterSettings { Indent = false, Encoding = Encoding.UTF8, Async = true };
+        await using (var writer = XmlWriter.Create(sw, writerSettings))
         {
             await writer.WriteStartDocumentAsync();
             writer.WriteStartElement("urlset", "http://www.sitemaps.org/schemas/sitemap/0.9");
@@ -92,7 +92,7 @@ public class SiteMapMapHandler
             await writer.WriteEndElementAsync();
         }
 
-        var xml = sb.ToString();
+        var xml = Encoding.UTF8.GetString(mem.ToArray());
         return xml;
     }
 
